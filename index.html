@@ -1,0 +1,368 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Flight Entry Management - Final Updated</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+        body { font-family: 'Inter', sans-serif; background-color: #f8fafc; color: #1e293b; }
+        .navy-bg { background-color: #07476d; }
+        .navy-text { color: #07476d; }
+        
+        .dropdown-container { position: relative; }
+        .custom-dropdown {
+            position: absolute; top: 105%; left: 0; right: 0;
+            background: white; border: 1px solid #e2e8f0; border-radius: 8px;
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1); z-index: 50; display: none;
+        }
+        .dropdown-list { max-height: 180px; overflow-y: auto; }
+        .dropdown-item { padding: 10px 15px; display: flex; align-items: center; gap: 10px; cursor: pointer; font-size: 13px; }
+        .dropdown-item:hover { background-color: #f1f5f9; }
+
+        .input-box { border: 1px solid #cbd5e1; border-radius: 6px; padding: 10px; width: 100%; font-size: 14px; outline: none; }
+        .input-box:focus { border-color: #07476d; box-shadow: 0 0 0 2px rgba(7, 71, 109, 0.1); }
+        
+        .modal-overlay { background: rgba(15, 23, 42, 0.7); backdrop-filter: blur(4px); }
+        th { cursor: pointer; background: #f8fafc; color: #64748b; font-size: 11px; text-transform: uppercase; padding: 12px; border-bottom: 1px solid #e2e8f0; white-space: nowrap; }
+        .edit-row { background-color: #fffbeb !important; }
+    </style>
+</head>
+<body class="p-4 md:p-8">
+
+    <div class="max-w-7xl mx-auto">
+        <header class="mb-8 flex justify-between items-center">
+            <div>
+                <h1 class="text-2xl font-bold navy-text">Flight Entry Management</h1>
+                <p class="text-xs text-slate-500 font-medium">South Sudan Civil Aviation Movement Tracking</p>
+            </div>
+            <div class="text-sm font-semibold text-slate-600 flex items-center gap-2">
+                Devs Aerogon <i class="fa-solid fa-circle-user text-xl navy-text"></i>
+            </div>
+        </header>
+
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            <div class="lg:col-span-2">
+                <div class="bg-white rounded-xl border border-slate-200 p-6 shadow-sm">
+                    <h2 class="font-bold text-slate-700 mb-6 flex items-center gap-2"><i class="fa-solid fa-pen-to-square navy-text"></i> New Flight Entry</h2>
+                    
+                    <form id="flightForm" class="grid grid-cols-1 md:grid-cols-2 gap-5">
+                        <div class="form-group">
+                            <label class="block text-[11px] font-bold text-slate-400 mb-1 uppercase">Flight Date *</label>
+                            <input type="date" id="flightDate" class="input-box" required>
+                        </div>
+
+                        <div class="dropdown-container">
+                            <label class="block text-[11px] font-bold text-slate-400 mb-1 uppercase">Aircraft Registration *</label>
+                            <div class="input-box flex justify-between items-center cursor-pointer bg-white" onclick="toggleDropdown('regDropdown')">
+                                <span id="display-reg" class="text-slate-400">Select Registration...</span>
+                                <i class="fa-solid fa-chevron-down text-[10px] text-slate-400"></i>
+                            </div>
+                            <div id="regDropdown" class="custom-dropdown">
+                                <div class="p-2 border-b flex items-center bg-slate-50">
+                                    <i class="fa-solid fa-magnifying-glass text-slate-400 mr-2 text-xs"></i>
+                                    <input type="text" placeholder="Filter..." class="w-full bg-transparent text-sm outline-none" oninput="filterList(this, 'regList')">
+                                </div>
+                                <div class="dropdown-list" id="regList">
+                                    <div class="dropdown-item" onclick="selectItem('reg', '5Y-EST')">5Y-EST</div>
+                                    <div class="dropdown-item" onclick="selectItem('reg', 'ST-AFX')">ST-AFX</div>
+                                </div>
+                                <div class="p-2 border-t text-center"><button type="button" onclick="openPop('Registration', true)" class="text-[11px] font-bold navy-text">+ ADD NEW REG</button></div>
+                            </div>
+                        </div>
+
+                        <div class="dropdown-container">
+                            <label class="block text-[11px] font-bold text-slate-400 mb-1 uppercase">Callsign *</label>
+                            <div class="input-box flex justify-between items-center cursor-pointer bg-white" onclick="toggleDropdown('callDropdown')">
+                                <span id="display-call" class="text-slate-400">Select Callsign...</span>
+                                <i class="fa-solid fa-chevron-down text-[10px] text-slate-400"></i>
+                            </div>
+                            <div id="callDropdown" class="custom-dropdown">
+                                <div class="p-2 border-b flex items-center bg-slate-50">
+                                    <i class="fa-solid fa-magnifying-glass text-slate-400 mr-2 text-xs"></i>
+                                    <input type="text" placeholder="Filter..." class="w-full bg-transparent text-sm outline-none" oninput="filterList(this, 'callList')">
+                                </div>
+                                <div class="dropdown-list" id="callList">
+                                    <div class="dropdown-item" onclick="selectItem('call', 'MAF6')">MAF6</div>
+                                    <div class="dropdown-item" onclick="selectItem('call', 'WFP721')">WFP721</div>
+                                </div>
+                                <div class="p-2 border-t text-center"><button type="button" onclick="openPop('Callsign', false)" class="text-[11px] font-bold navy-text">+ ADD NEW</button></div>
+                            </div>
+                        </div>
+
+                        <div class="dropdown-container">
+                            <label class="block text-[11px] font-bold text-slate-400 mb-1 uppercase">Aircraft Type *</label>
+                            <div class="input-box flex justify-between items-center cursor-pointer bg-white" onclick="toggleDropdown('typeDropdown')">
+                                <span id="display-type" class="text-slate-400">Select A/C Type...</span>
+                                <i class="fa-solid fa-chevron-down text-[10px] text-slate-400"></i>
+                            </div>
+                            <div id="typeDropdown" class="custom-dropdown">
+                                <div class="p-2 border-b flex items-center bg-slate-50">
+                                    <i class="fa-solid fa-magnifying-glass text-slate-400 mr-2 text-xs"></i>
+                                    <input type="text" placeholder="Filter..." class="w-full bg-transparent text-sm outline-none" oninput="filterList(this, 'typeList')">
+                                </div>
+                                <div class="dropdown-list" id="typeList">
+                                    <div class="dropdown-item" onclick="selectItem('type', 'C208')">C208</div>
+                                    <div class="dropdown-item" onclick="selectItem('type', 'B738')">B738</div>
+                                </div>
+                                <div class="p-2 border-t text-center"><button type="button" onclick="openPop('Aircraft Type', false)" class="text-[11px] font-bold navy-text">+ ADD NEW</button></div>
+                            </div>
+                        </div>
+
+                        <div class="dropdown-container">
+                            <label class="block text-[11px] font-bold text-slate-400 mb-1 uppercase">Departure Point *</label>
+                            <div class="input-box flex justify-between items-center cursor-pointer bg-white" onclick="toggleDropdown('depDropdown')">
+                                <span id="display-dep" class="text-slate-400">Select Departure...</span>
+                                <i class="fa-solid fa-chevron-down text-[10px] text-slate-400"></i>
+                            </div>
+                            <div id="depDropdown" class="custom-dropdown">
+                                <div class="p-2 border-b flex items-center bg-slate-50">
+                                    <i class="fa-solid fa-magnifying-glass text-slate-400 mr-2 text-xs"></i>
+                                    <input type="text" placeholder="Filter..." class="w-full bg-transparent text-sm outline-none" oninput="filterList(this, 'depList')">
+                                </div>
+                                <div class="dropdown-list" id="depList">
+                                    <div class="dropdown-item" onclick="selectItem('dep', 'HSSJ')">HSSJ (Juba)</div>
+                                    <div class="dropdown-item" onclick="selectItem('dep', 'HKJK')">HKJK (Nairobi)</div>
+                                </div>
+                                <div class="p-2 border-t text-center"><button type="button" onclick="openPop('Departure Point', false)" class="text-[11px] font-bold navy-text">+ ADD NEW</button></div>
+                            </div>
+                        </div>
+
+                        <div class="dropdown-container">
+                            <label class="block text-[11px] font-bold text-slate-400 mb-1 uppercase">Destination Point *</label>
+                            <div class="input-box flex justify-between items-center cursor-pointer bg-white" onclick="toggleDropdown('destDropdown')">
+                                <span id="display-dest" class="text-slate-400">Select Destination...</span>
+                                <i class="fa-solid fa-chevron-down text-[10px] text-slate-400"></i>
+                            </div>
+                            <div id="destDropdown" class="custom-dropdown">
+                                <div class="p-2 border-b flex items-center bg-slate-50">
+                                    <i class="fa-solid fa-magnifying-glass text-slate-400 mr-2 text-xs"></i>
+                                    <input type="text" placeholder="Filter..." class="w-full bg-transparent text-sm outline-none" oninput="filterList(this, 'destList')">
+                                </div>
+                                <div class="dropdown-list" id="destList">
+                                    <div class="dropdown-item" onclick="selectItem('dest', 'HSWW')">HSWW (Wau)</div>
+                                    <div class="dropdown-item" onclick="selectItem('dest', 'HSSM')">HSSM (Malakal)</div>
+                                </div>
+                                <div class="p-2 border-t text-center"><button type="button" onclick="openPop('Destination Point', false)" class="text-[11px] font-bold navy-text">+ ADD NEW</button></div>
+                            </div>
+                        </div>
+
+                        <div class="md:col-span-2">
+                            <label class="block text-[11px] font-bold text-slate-400 mb-1 uppercase">Remarks & Observations</label>
+                            <textarea id="remarks" class="input-box h-20" placeholder="Enter remarks (Optional)"></textarea>
+                        </div>
+                        <div class="md:col-span-2 flex justify-end">
+                            <button type="submit" id="submitBtn" class="navy-bg text-white px-10 py-3 rounded-md font-bold hover:opacity-90 transition">
+                                Submit Entry
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <div class="space-y-6">
+                <div class="navy-bg text-white p-6 rounded-xl shadow-lg relative overflow-hidden">
+                    <h3 class="text-xs opacity-70 mb-6 font-bold uppercase tracking-widest">Registry Summary</h3>
+                    <div class="space-y-4 relative z-10">
+                        <div class="flex justify-between border-b border-white/10 pb-3"><span>Total A/C</span> <span id="stat-total" class="font-bold text-2xl">142</span></div>
+                        <div class="flex justify-between border-b border-white/10 pb-3"><span>Current Month</span> <span id="stat-curr" class="font-bold text-xl">89</span></div>
+                        <div class="flex justify-between"><span>Last Month</span> <span class="font-bold text-xl">12</span></div>
+                    </div>
+                    <i class="fa-solid fa-plane absolute -bottom-4 -right-4 text-white/5 text-8xl -rotate-12"></i>
+                </div>
+
+                <div class="bg-blue-50 border border-blue-100 p-6 rounded-xl">
+                    <h4 class="navy-text font-bold text-sm mb-2">Need Assistance?</h4>
+                    <p class="text-[11px] text-slate-600 leading-relaxed mb-4">Contact the Registry Division for missing codes.</p>
+                    <button class="w-full bg-white border border-slate-200 py-2 rounded-lg font-bold navy-text text-xs hover:bg-slate-50 transition">Contact Support</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="bg-white rounded-xl border border-slate-200 mt-10 overflow-hidden shadow-sm">
+            <div class="p-5 border-b flex justify-between items-center bg-white flex-wrap gap-4">
+                <h2 class="font-bold navy-text flex items-center gap-2"><i class="fa-solid fa-list-check"></i> Recent Flight Records</h2>
+                <div class="flex gap-2">
+                    <input type="text" id="tableFilter" placeholder="Filter records..." class="text-xs border p-2 rounded w-48 outline-none" oninput="filterTable()">
+                    <button onclick="exportToExcel()" class="text-xs bg-slate-50 border border-slate-200 px-4 py-2 rounded font-bold text-slate-600">
+                        <i class="fa-solid fa-file-excel mr-1 text-green-600"></i> Export
+                    </button>
+                </div>
+            </div>
+            <div class="overflow-x-auto">
+                <table class="w-full text-left" id="flightTable">
+                    <thead>
+                        <tr>
+                            <th onclick="sortTable(0)">S/N</th>
+                            <th onclick="sortTable(1)">Flight Date</th>
+                            <th onclick="sortTable(2)">Aircraft Registration</th>
+                            <th onclick="sortTable(3)">Callsign</th>
+                            <th onclick="sortTable(4)">Aircraft Type</th>
+                            <th onclick="sortTable(5)">Departure Point</th>
+                            <th onclick="sortTable(6)">Destination Point</th>
+                            <th onclick="sortTable(7)">Remarks & Observations</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tableBody"></tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <div id="uniModal" class="modal-overlay fixed inset-0 hidden flex items-center justify-center z-[100] p-4">
+        <div class="bg-white rounded-xl w-full max-w-md shadow-2xl animate-in zoom-in duration-200">
+            <div class="p-4 border-b flex justify-between items-center bg-slate-50">
+                <h3 id="modalTitle" class="font-bold navy-text">Add New Record</h3>
+                <button onclick="closePop()" class="text-slate-400 text-2xl">&times;</button>
+            </div>
+            <div class="p-6">
+                <label class="block text-[10px] font-bold text-slate-400 mb-2 uppercase">Identification Value</label>
+                <input type="text" id="modalInput" placeholder="Enter value..." class="input-box uppercase font-bold text-blue-600 mb-2">
+                <p id="modalError" class="text-red-500 text-[11px] font-medium hidden">
+                    <i class="fa-solid fa-circle-exclamation"></i> Invalid format! Use XX-XXX (e.g., 5Y-MAG)
+                </p>
+                <div class="flex gap-3 mt-8">
+                    <button onclick="closePop()" class="flex-1 py-3 text-slate-400 font-bold hover:bg-slate-50 rounded-lg">Cancel</button>
+                    <button onclick="saveFromModal()" class="flex-1 py-3 bg-blue-600 text-white font-bold rounded-lg">Add Record</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let currentTarget = "", hyphenRequired = false, editingRow = null;
+        let stats = { total: 142, curr: 89 };
+        const selections = { reg: "", call: "", type: "", dep: "", dest: "" };
+
+        function toggleDropdown(id) {
+            document.querySelectorAll('.custom-dropdown').forEach(d => { if(d.id !== id) d.style.display = 'none' });
+            const el = document.getElementById(id);
+            el.style.display = el.style.display === 'block' ? 'none' : 'block';
+        }
+
+        function filterList(input, listId) {
+            const term = input.value.toUpperCase();
+            document.getElementById(listId).querySelectorAll('.dropdown-item').forEach(item => {
+                item.style.display = item.innerText.toUpperCase().includes(term) ? 'flex' : 'none';
+            });
+        }
+
+        function selectItem(key, val) {
+            selections[key] = val;
+            const display = document.getElementById(`display-${key}`);
+            display.innerText = val;
+            display.className = "font-bold text-blue-700";
+            document.querySelectorAll('.custom-dropdown').forEach(d => d.style.display = 'none');
+        }
+
+        function openPop(title, hyphen) {
+            currentTarget = title; hyphenRequired = hyphen;
+            document.getElementById('modalTitle').innerText = "Add New " + title;
+            document.getElementById('uniModal').classList.remove('hidden');
+        }
+
+        function closePop() { document.getElementById('uniModal').classList.add('hidden'); document.getElementById('modalError').classList.add('hidden'); }
+
+        function saveFromModal() {
+            const val = document.getElementById('modalInput').value.trim().toUpperCase();
+            if (hyphenRequired && !/^[A-Z0-9]{2}-[A-Z0-9]+$/.test(val)) return document.getElementById('modalError').classList.remove('hidden');
+            const map = { "Registration": "reg", "Callsign": "call", "Aircraft Type": "type", "Departure Point": "dep", "Destination Point": "dest" };
+            const key = map[currentTarget];
+            const div = document.createElement('div');
+            div.className = "dropdown-item"; div.innerText = val;
+            div.onclick = () => selectItem(key, val);
+            document.getElementById(`${key}List`).prepend(div);
+            selectItem(key, val); closePop();
+        }
+
+        document.getElementById('flightForm').onsubmit = (e) => {
+            e.preventDefault();
+            if (!selections.reg || !selections.call || !selections.type || !selections.dep || !selections.dest) return alert("Fill mandatory fields!");
+
+            const tableBody = document.getElementById('tableBody');
+            const sn = editingRow ? editingRow.cells[0].innerText : (tableBody.rows.length + 1).toString().padStart(3, '0');
+            const date = document.getElementById('flightDate').value;
+            const remarks = document.getElementById('remarks').value;
+
+            const rowContent = `
+                <td>${sn}</td>
+                <td class="italic text-slate-500">${date}</td>
+                <td class="font-bold text-blue-700">${selections.reg}</td>
+                <td>${selections.call}</td>
+                <td>${selections.type}</td>
+                <td>${selections.dep}</td>
+                <td>${selections.dest}</td>
+                <td class="text-xs text-slate-400 truncate max-w-[150px]">${remarks}</td>
+                <td class="flex gap-3 text-slate-300 py-4">
+                    <i class="fa-solid fa-pen-to-square hover:text-blue-600 cursor-pointer" onclick="editRow(this)"></i>
+                    <i class="fa-solid fa-trash hover:text-red-500 cursor-pointer" onclick="deleteRow(this)"></i>
+                </td>
+            `;
+
+            if (editingRow) {
+                editingRow.innerHTML = rowContent; editingRow.classList.remove('edit-row'); editingRow = null;
+                document.getElementById('submitBtn').innerText = "Submit Entry";
+            } else {
+                const tr = document.createElement('tr'); tr.className = "border-b hover:bg-slate-50"; tr.innerHTML = rowContent;
+                tableBody.prepend(tr); stats.total++; stats.curr++; updateStats();
+            }
+            resetForm();
+        };
+
+        function resetForm() {
+            document.getElementById('flightForm').reset();
+            ["reg", "call", "type", "dep", "dest"].forEach(k => {
+                selections[k] = ""; const d = document.getElementById(`display-${k}`);
+                d.innerText = `Select ${k.toUpperCase()}...`; d.className = "text-slate-400";
+            });
+        }
+
+        function updateStats() {
+            document.getElementById('stat-total').innerText = stats.total;
+            document.getElementById('stat-curr').innerText = stats.curr;
+        }
+
+        function deleteRow(btn) { if(confirm("Delete?")) { btn.closest('tr').remove(); stats.total--; stats.curr--; updateStats(); } }
+
+        function editRow(btn) {
+            editingRow = btn.closest('tr'); editingRow.classList.add('edit-row');
+            document.getElementById('submitBtn').innerText = "Update Record";
+            document.getElementById('flightDate').value = editingRow.cells[1].innerText;
+            selectItem('reg', editingRow.cells[2].innerText); 
+            selectItem('call', editingRow.cells[3].innerText);
+            selectItem('type', editingRow.cells[4].innerText); 
+            selectItem('dep', editingRow.cells[5].innerText);
+            selectItem('dest', editingRow.cells[6].innerText);
+            document.getElementById('remarks').value = editingRow.cells[7].innerText;
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        function filterTable() {
+            const term = document.getElementById('tableFilter').value.toLowerCase();
+            document.querySelectorAll('#tableBody tr').forEach(row => { row.style.display = row.innerText.toLowerCase().includes(term) ? '' : 'none'; });
+        }
+
+        function exportToExcel() { XLSX.writeFile(XLSX.utils.table_to_book(document.getElementById("flightTable")), "Flights.xlsx"); }
+        
+        function sortTable(n) {
+            const table = document.getElementById("flightTable");
+            let rows, switching, i, x, y, shouldSwitch, dir, switchcount = 0;
+            switching = true; dir = "asc";
+            while (switching) {
+                switching = false; rows = table.rows;
+                for (i = 1; i < (rows.length - 1); i++) {
+                    shouldSwitch = false; x = rows[i].getElementsByTagName("TD")[n]; y = rows[i + 1].getElementsByTagName("TD")[n];
+                    if (dir == "asc" && x.innerHTML.toLowerCase() > y.innerHTML.toLowerCase()) { shouldSwitch = true; break; }
+                    else if (dir == "desc" && x.innerHTML.toLowerCase() < y.innerHTML.toLowerCase()) { shouldSwitch = true; break; }
+                }
+                if (shouldSwitch) { rows[i].parentNode.insertBefore(rows[i + 1], rows[i]); switching = true; switchcount ++; }
+                else if (switchcount == 0 && dir == "asc") { dir = "desc"; switching = true; }
+            }
+        }
+    </script>
+</body>
+</html>
