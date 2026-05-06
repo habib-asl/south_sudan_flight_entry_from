@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Flight Entry Management - Final Updated</title>
+    <title>Flight Entry Management - Excel Integrated</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
@@ -56,7 +56,26 @@
                         </div>
 
                         <div class="dropdown-container">
-                            <label class="block text-[11px] font-bold text-slate-400 mb-1 uppercase">Aircraft Registration *</label>
+                            <label class="block text-[11px] font-bold text-slate-400 mb-1 uppercase">Operator *</label>
+                            <div class="input-box flex justify-between items-center cursor-pointer bg-white" onclick="toggleDropdown('operatorDropdown')">
+                                <span id="display-operator" class="text-slate-400">Select Operator...</span>
+                                <i class="fa-solid fa-chevron-down text-[10px] text-slate-400"></i>
+                            </div>
+                            <div id="operatorDropdown" class="custom-dropdown">
+                                <div class="p-2 border-b flex items-center bg-slate-50">
+                                    <i class="fa-solid fa-magnifying-glass text-slate-400 mr-2 text-xs"></i>
+                                    <input type="text" placeholder="Filter..." class="w-full bg-transparent text-sm outline-none" oninput="filterList(this, 'operatorList')">
+                                </div>
+                                <div class="dropdown-list" id="operatorList">
+                                    <div class="dropdown-item" onclick="selectItem('operator', 'Uganda Air')">Uganda Air</div>
+                                    <div class="dropdown-item" onclick="selectItem('operator', 'Kenya Airways')">Kenya Airways</div>
+                                </div>
+                                <div class="p-2 border-t text-center"><button type="button" onclick="openPop('Operator', false)" class="text-[11px] font-bold navy-text">+ ADD NEW</button></div>
+                            </div>
+                        </div>
+
+                        <div class="dropdown-container">
+                            <label class="block text-[11px] font-bold text-slate-400 mb-1 uppercase">A/C Registration *</label>
                             <div class="input-box flex justify-between items-center cursor-pointer bg-white" onclick="toggleDropdown('regDropdown')">
                                 <span id="display-reg" class="text-slate-400">Select Registration...</span>
                                 <i class="fa-solid fa-chevron-down text-[10px] text-slate-400"></i>
@@ -94,7 +113,7 @@
                         </div>
 
                         <div class="dropdown-container">
-                            <label class="block text-[11px] font-bold text-slate-400 mb-1 uppercase">Aircraft Type *</label>
+                            <label class="block text-[11px] font-bold text-slate-400 mb-1 uppercase">A/C Type *</label>
                             <div class="input-box flex justify-between items-center cursor-pointer bg-white" onclick="toggleDropdown('typeDropdown')">
                                 <span id="display-type" class="text-slate-400">Select A/C Type...</span>
                                 <i class="fa-solid fa-chevron-down text-[10px] text-slate-400"></i>
@@ -113,9 +132,9 @@
                         </div>
 
                         <div class="dropdown-container">
-                            <label class="block text-[11px] font-bold text-slate-400 mb-1 uppercase">Departure Point *</label>
+                            <label class="block text-[11px] font-bold text-slate-400 mb-1 uppercase">Origin *</label>
                             <div class="input-box flex justify-between items-center cursor-pointer bg-white" onclick="toggleDropdown('depDropdown')">
-                                <span id="display-dep" class="text-slate-400">Select Departure...</span>
+                                <span id="display-dep" class="text-slate-400">Select Origin...</span>
                                 <i class="fa-solid fa-chevron-down text-[10px] text-slate-400"></i>
                             </div>
                             <div id="depDropdown" class="custom-dropdown">
@@ -147,6 +166,54 @@
                                     <div class="dropdown-item" onclick="selectItem('dest', 'HSSM')">HSSM (Malakal)</div>
                                 </div>
                                 <div class="p-2 border-t text-center"><button type="button" onclick="openPop('Destination Point', false)" class="text-[11px] font-bold navy-text">+ ADD NEW</button></div>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="block text-[11px] font-bold text-slate-400 mb-1 uppercase">Origin Type</label>
+                            <select id="originType" class="input-box">
+                                <option value="">Select Type...</option>
+                                <option value="Domestic">Domestic</option>
+                                <option value="International (Landing)">International (Landing)</option>
+                                <option value="International (Takeoff)">International (Takeoff)</option>
+                            </select>
+                        </div>
+
+                        <div class="dropdown-container">
+                            <label class="block text-[11px] font-bold text-slate-400 mb-1 uppercase">FIR In</label>
+                            <div class="input-box flex justify-between items-center cursor-pointer bg-white" onclick="toggleDropdown('firInDropdown')">
+                                <span id="display-firIn" class="text-slate-400">Select FIR In...</span>
+                                <i class="fa-solid fa-chevron-down text-[10px] text-slate-400"></i>
+                            </div>
+                            <div id="firInDropdown" class="custom-dropdown">
+                                <div class="p-2 border-b flex items-center bg-slate-50">
+                                    <i class="fa-solid fa-magnifying-glass text-slate-400 mr-2 text-xs"></i>
+                                    <input type="text" placeholder="Filter..." class="w-full bg-transparent text-sm outline-none" oninput="filterList(this, 'firInList')">
+                                </div>
+                                <div class="dropdown-list" id="firInList">
+                                    <div class="dropdown-item" onclick="selectItem('firIn', 'Kafia')">Kafia</div>
+                                    <div class="dropdown-item" onclick="selectItem('firIn', 'Juba FIR')">Juba FIR</div>
+                                </div>
+                                <div class="p-2 border-t text-center"><button type="button" onclick="openPop('FIR In', false)" class="text-[11px] font-bold navy-text">+ ADD NEW</button></div>
+                            </div>
+                        </div>
+
+                        <div class="dropdown-container">
+                            <label class="block text-[11px] font-bold text-slate-400 mb-1 uppercase">FIR Out</label>
+                            <div class="input-box flex justify-between items-center cursor-pointer bg-white" onclick="toggleDropdown('firOutDropdown')">
+                                <span id="display-firOut" class="text-slate-400">Select FIR Out...</span>
+                                <i class="fa-solid fa-chevron-down text-[10px] text-slate-400"></i>
+                            </div>
+                            <div id="firOutDropdown" class="custom-dropdown">
+                                <div class="p-2 border-b flex items-center bg-slate-50">
+                                    <i class="fa-solid fa-magnifying-glass text-slate-400 mr-2 text-xs"></i>
+                                    <input type="text" placeholder="Filter..." class="w-full bg-transparent text-sm outline-none" oninput="filterList(this, 'firOutList')">
+                                </div>
+                                <div class="dropdown-list" id="firOutList">
+                                    <div class="dropdown-item" onclick="selectItem('firOut', 'Epsix')">Epsix</div>
+                                    <div class="dropdown-item" onclick="selectItem('firOut', 'Entebbe FIR')">Entebbe FIR</div>
+                                </div>
+                                <div class="p-2 border-t text-center"><button type="button" onclick="openPop('FIR Out', false)" class="text-[11px] font-bold navy-text">+ ADD NEW</button></div>
                             </div>
                         </div>
 
@@ -198,12 +265,16 @@
                         <tr>
                             <th onclick="sortTable(0)">S/N</th>
                             <th onclick="sortTable(1)">Flight Date</th>
-                            <th onclick="sortTable(2)">Aircraft Registration</th>
-                            <th onclick="sortTable(3)">Callsign</th>
-                            <th onclick="sortTable(4)">Aircraft Type</th>
-                            <th onclick="sortTable(5)">Departure Point</th>
-                            <th onclick="sortTable(6)">Destination Point</th>
-                            <th onclick="sortTable(7)">Remarks & Observations</th>
+                            <th onclick="sortTable(2)">Operator</th>
+                            <th onclick="sortTable(3)">A/C Registration</th>
+                            <th onclick="sortTable(4)">Callsign</th>
+                            <th onclick="sortTable(5)">A/C Type</th>
+                            <th onclick="sortTable(6)">Origin</th>
+                            <th onclick="sortTable(7)">Destination</th>
+                            <th onclick="sortTable(8)">Origin Type</th>
+                            <th onclick="sortTable(9)">FIR In</th>
+                            <th onclick="sortTable(10)">FIR Out</th>
+                            <th onclick="sortTable(11)">Remarks</th>
                             <th>Actions</th>
                         </tr>
                     </thead>
@@ -236,7 +307,8 @@
     <script>
         let currentTarget = "", hyphenRequired = false, editingRow = null;
         let stats = { total: 142, curr: 89 };
-        const selections = { reg: "", call: "", type: "", dep: "", dest: "" };
+        // Initializing selections for the new dropdowns
+        const selections = { reg: "", call: "", type: "", dep: "", dest: "", operator: "", firIn: "", firOut: "" };
 
         function toggleDropdown(id) {
             document.querySelectorAll('.custom-dropdown').forEach(d => { if(d.id !== id) d.style.display = 'none' });
@@ -262,6 +334,7 @@
         function openPop(title, hyphen) {
             currentTarget = title; hyphenRequired = hyphen;
             document.getElementById('modalTitle').innerText = "Add New " + title;
+            document.getElementById('modalInput').value = ""; // Clear input
             document.getElementById('uniModal').classList.remove('hidden');
         }
 
@@ -270,7 +343,19 @@
         function saveFromModal() {
             const val = document.getElementById('modalInput').value.trim().toUpperCase();
             if (hyphenRequired && !/^[A-Z0-9]{2}-[A-Z0-9]+$/.test(val)) return document.getElementById('modalError').classList.remove('hidden');
-            const map = { "Registration": "reg", "Callsign": "call", "Aircraft Type": "type", "Departure Point": "dep", "Destination Point": "dest" };
+            
+            // Map modal titles to selection keys
+            const map = { 
+                "Registration": "reg", 
+                "Callsign": "call", 
+                "Aircraft Type": "type", 
+                "Departure Point": "dep", 
+                "Destination Point": "dest",
+                "Operator": "operator",
+                "FIR In": "firIn",
+                "FIR Out": "firOut"
+            };
+            
             const key = map[currentTarget];
             const div = document.createElement('div');
             div.className = "dropdown-item"; div.innerText = val;
@@ -281,21 +366,28 @@
 
         document.getElementById('flightForm').onsubmit = (e) => {
             e.preventDefault();
-            if (!selections.reg || !selections.call || !selections.type || !selections.dep || !selections.dest) return alert("Fill mandatory fields!");
+            // Checking mandatory fields (including operator now)
+            if (!selections.reg || !selections.call || !selections.type || !selections.dep || !selections.dest || !selections.operator) return alert("Fill mandatory fields!");
 
             const tableBody = document.getElementById('tableBody');
             const sn = editingRow ? editingRow.cells[0].innerText : (tableBody.rows.length + 1).toString().padStart(3, '0');
+            
             const date = document.getElementById('flightDate').value;
+            const originType = document.getElementById('originType').value;
             const remarks = document.getElementById('remarks').value;
 
             const rowContent = `
                 <td>${sn}</td>
                 <td class="italic text-slate-500">${date}</td>
+                <td>${selections.operator}</td>
                 <td class="font-bold text-blue-700">${selections.reg}</td>
                 <td>${selections.call}</td>
                 <td>${selections.type}</td>
                 <td>${selections.dep}</td>
                 <td>${selections.dest}</td>
+                <td>${originType}</td>
+                <td>${selections.firIn}</td>
+                <td>${selections.firOut}</td>
                 <td class="text-xs text-slate-400 truncate max-w-[150px]">${remarks}</td>
                 <td class="flex gap-3 text-slate-300 py-4">
                     <i class="fa-solid fa-pen-to-square hover:text-blue-600 cursor-pointer" onclick="editRow(this)"></i>
@@ -315,9 +407,11 @@
 
         function resetForm() {
             document.getElementById('flightForm').reset();
-            ["reg", "call", "type", "dep", "dest"].forEach(k => {
+            ["reg", "call", "type", "dep", "dest", "operator", "firIn", "firOut"].forEach(k => {
                 selections[k] = ""; const d = document.getElementById(`display-${k}`);
-                d.innerText = `Select ${k.toUpperCase()}...`; d.className = "text-slate-400";
+                if(d) {
+                   d.innerText = `Select ${k.toUpperCase()}...`; d.className = "text-slate-400";
+                }
             });
         }
 
@@ -331,13 +425,18 @@
         function editRow(btn) {
             editingRow = btn.closest('tr'); editingRow.classList.add('edit-row');
             document.getElementById('submitBtn').innerText = "Update Record";
+            
             document.getElementById('flightDate').value = editingRow.cells[1].innerText;
-            selectItem('reg', editingRow.cells[2].innerText); 
-            selectItem('call', editingRow.cells[3].innerText);
-            selectItem('type', editingRow.cells[4].innerText); 
-            selectItem('dep', editingRow.cells[5].innerText);
-            selectItem('dest', editingRow.cells[6].innerText);
-            document.getElementById('remarks').value = editingRow.cells[7].innerText;
+            selectItem('operator', editingRow.cells[2].innerText);
+            selectItem('reg', editingRow.cells[3].innerText); 
+            selectItem('call', editingRow.cells[4].innerText);
+            selectItem('type', editingRow.cells[5].innerText); 
+            selectItem('dep', editingRow.cells[6].innerText);
+            selectItem('dest', editingRow.cells[7].innerText);
+            document.getElementById('originType').value = editingRow.cells[8].innerText;
+            selectItem('firIn', editingRow.cells[9].innerText);
+            selectItem('firOut', editingRow.cells[10].innerText);
+            document.getElementById('remarks').value = editingRow.cells[11].innerText;
             window.scrollTo({ top: 0, behavior: 'smooth' });
         }
 
