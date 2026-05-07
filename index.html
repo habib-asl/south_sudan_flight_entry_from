@@ -70,7 +70,7 @@
                                     <div class="dropdown-item" onclick="selectItem('operator', 'Uganda Air')">Uganda Air</div>
                                     <div class="dropdown-item" onclick="selectItem('operator', 'Kenya Airways')">Kenya Airways</div>
                                 </div>
-                                <div class="p-2 border-t text-center"><button type="button" onclick="openPop('Operator', false)" class="text-[11px] font-bold navy-text">+ ADD NEW</button></div>
+                                <div class="p-2 border-t text-center"><button type="button" onclick="openPop('Operator')" class="text-[11px] font-bold navy-text">+ ADD NEW</button></div>
                             </div>
                         </div>
 
@@ -89,7 +89,7 @@
                                     <div class="dropdown-item" onclick="selectItem('reg', '5Y-EST')">5Y-EST</div>
                                     <div class="dropdown-item" onclick="selectItem('reg', 'ST-AFX')">ST-AFX</div>
                                 </div>
-                                <div class="p-2 border-t text-center"><button type="button" onclick="openPop('Registration', true)" class="text-[11px] font-bold navy-text">+ ADD NEW REG</button></div>
+                                <div class="p-2 border-t text-center"><button type="button" onclick="openPop('Registration')" class="text-[11px] font-bold navy-text">+ ADD NEW REG</button></div>
                             </div>
                         </div>
 
@@ -108,7 +108,7 @@
                                     <div class="dropdown-item" onclick="selectItem('call', 'MAF6')">MAF6</div>
                                     <div class="dropdown-item" onclick="selectItem('call', 'WFP721')">WFP721</div>
                                 </div>
-                                <div class="p-2 border-t text-center"><button type="button" onclick="openPop('Callsign', false)" class="text-[11px] font-bold navy-text">+ ADD NEW</button></div>
+                                <div class="p-2 border-t text-center"><button type="button" onclick="openPop('Callsign')" class="text-[11px] font-bold navy-text">+ ADD NEW</button></div>
                             </div>
                         </div>
 
@@ -127,7 +127,7 @@
                                     <div class="dropdown-item" onclick="selectItem('type', 'C208')">C208</div>
                                     <div class="dropdown-item" onclick="selectItem('type', 'B738')">B738</div>
                                 </div>
-                                <div class="p-2 border-t text-center"><button type="button" onclick="openPop('Aircraft Type', false)" class="text-[11px] font-bold navy-text">+ ADD NEW</button></div>
+                                <div class="p-2 border-t text-center"><button type="button" onclick="openPop('Aircraft Type')" class="text-[11px] font-bold navy-text">+ ADD NEW</button></div>
                             </div>
                         </div>
 
@@ -146,7 +146,7 @@
                                     <div class="dropdown-item" onclick="selectItem('dep', 'HSSJ')">HSSJ (Juba)</div>
                                     <div class="dropdown-item" onclick="selectItem('dep', 'HKJK')">HKJK (Nairobi)</div>
                                 </div>
-                                <div class="p-2 border-t text-center"><button type="button" onclick="openPop('Departure Point', false)" class="text-[11px] font-bold navy-text">+ ADD NEW</button></div>
+                                <div class="p-2 border-t text-center"><button type="button" onclick="openPop('Departure Point')" class="text-[11px] font-bold navy-text">+ ADD NEW</button></div>
                             </div>
                         </div>
 
@@ -165,17 +165,17 @@
                                     <div class="dropdown-item" onclick="selectItem('dest', 'HSWW')">HSWW (Wau)</div>
                                     <div class="dropdown-item" onclick="selectItem('dest', 'HSSM')">HSSM (Malakal)</div>
                                 </div>
-                                <div class="p-2 border-t text-center"><button type="button" onclick="openPop('Destination Point', false)" class="text-[11px] font-bold navy-text">+ ADD NEW</button></div>
+                                <div class="p-2 border-t text-center"><button type="button" onclick="openPop('Destination Point')" class="text-[11px] font-bold navy-text">+ ADD NEW</button></div>
                             </div>
                         </div>
 
                         <div class="form-group">
                             <label class="block text-[11px] font-bold text-slate-400 mb-1 uppercase">Origin Type</label>
                             <select id="originType" class="input-box">
-                                <option value="">Select Type...</option>
                                 <option value="Domestic">Domestic</option>
                                 <option value="International (Landing)">International (Landing)</option>
                                 <option value="International (Takeoff)">International (Takeoff)</option>
+                                <option value="Overfly">Overfly</option>
                             </select>
                         </div>
 
@@ -194,7 +194,7 @@
                                     <div class="dropdown-item" onclick="selectItem('firIn', 'Kafia')">Kafia</div>
                                     <div class="dropdown-item" onclick="selectItem('firIn', 'Juba FIR')">Juba FIR</div>
                                 </div>
-                                <div class="p-2 border-t text-center"><button type="button" onclick="openPop('FIR In', false)" class="text-[11px] font-bold navy-text">+ ADD NEW</button></div>
+                                <div class="p-2 border-t text-center"><button type="button" onclick="openPop('FIR In')" class="text-[11px] font-bold navy-text">+ ADD NEW</button></div>
                             </div>
                         </div>
 
@@ -213,7 +213,7 @@
                                     <div class="dropdown-item" onclick="selectItem('firOut', 'Epsix')">Epsix</div>
                                     <div class="dropdown-item" onclick="selectItem('firOut', 'Entebbe FIR')">Entebbe FIR</div>
                                 </div>
-                                <div class="p-2 border-t text-center"><button type="button" onclick="openPop('FIR Out', false)" class="text-[11px] font-bold navy-text">+ ADD NEW</button></div>
+                                <div class="p-2 border-t text-center"><button type="button" onclick="openPop('FIR Out')" class="text-[11px] font-bold navy-text">+ ADD NEW</button></div>
                             </div>
                         </div>
 
@@ -293,9 +293,7 @@
             <div class="p-6">
                 <label class="block text-[10px] font-bold text-slate-400 mb-2 uppercase">Identification Value</label>
                 <input type="text" id="modalInput" placeholder="Enter value..." class="input-box uppercase font-bold text-blue-600 mb-2">
-                <p id="modalError" class="text-red-500 text-[11px] font-medium hidden">
-                    <i class="fa-solid fa-circle-exclamation"></i> Invalid format! Use XX-XXX (e.g., 5Y-MAG)
-                </p>
+                
                 <div class="flex gap-3 mt-8">
                     <button onclick="closePop()" class="flex-1 py-3 text-slate-400 font-bold hover:bg-slate-50 rounded-lg">Cancel</button>
                     <button onclick="saveFromModal()" class="flex-1 py-3 bg-blue-600 text-white font-bold rounded-lg">Add Record</button>
@@ -305,9 +303,8 @@
     </div>
 
     <script>
-        let currentTarget = "", hyphenRequired = false, editingRow = null;
+        let currentTarget = "", editingRow = null;
         let stats = { total: 142, curr: 89 };
-        // Initializing selections for the new dropdowns
         const selections = { reg: "", call: "", type: "", dep: "", dest: "", operator: "", firIn: "", firOut: "" };
 
         function toggleDropdown(id) {
@@ -326,25 +323,26 @@
         function selectItem(key, val) {
             selections[key] = val;
             const display = document.getElementById(`display-${key}`);
-            display.innerText = val;
-            display.className = "font-bold text-blue-700";
+            if (display) {
+                display.innerText = val;
+                display.className = "font-bold text-blue-700";
+            }
             document.querySelectorAll('.custom-dropdown').forEach(d => d.style.display = 'none');
         }
 
-        function openPop(title, hyphen) {
-            currentTarget = title; hyphenRequired = hyphen;
+        function openPop(title) {
+            currentTarget = title;
             document.getElementById('modalTitle').innerText = "Add New " + title;
-            document.getElementById('modalInput').value = ""; // Clear input
+            document.getElementById('modalInput').value = ""; 
             document.getElementById('uniModal').classList.remove('hidden');
         }
 
-        function closePop() { document.getElementById('uniModal').classList.add('hidden'); document.getElementById('modalError').classList.add('hidden'); }
+        function closePop() { document.getElementById('uniModal').classList.add('hidden'); }
 
         function saveFromModal() {
             const val = document.getElementById('modalInput').value.trim().toUpperCase();
-            if (hyphenRequired && !/^[A-Z0-9]{2}-[A-Z0-9]+$/.test(val)) return document.getElementById('modalError').classList.remove('hidden');
+            if (!val) return alert("Value cannot be empty!");
             
-            // Map modal titles to selection keys
             const map = { 
                 "Registration": "reg", 
                 "Callsign": "call", 
@@ -366,7 +364,6 @@
 
         document.getElementById('flightForm').onsubmit = (e) => {
             e.preventDefault();
-            // Checking mandatory fields (including operator now)
             if (!selections.reg || !selections.call || !selections.type || !selections.dep || !selections.dest || !selections.operator) return alert("Fill mandatory fields!");
 
             const tableBody = document.getElementById('tableBody');
@@ -410,7 +407,7 @@
             ["reg", "call", "type", "dep", "dest", "operator", "firIn", "firOut"].forEach(k => {
                 selections[k] = ""; const d = document.getElementById(`display-${k}`);
                 if(d) {
-                   d.innerText = `Select ${k.toUpperCase()}...`; d.className = "text-slate-400";
+                    d.innerText = `Select ${k.toUpperCase()}...`; d.className = "text-slate-400";
                 }
             });
         }
