@@ -28,13 +28,14 @@
         
         .modal-overlay { background: rgba(15, 23, 42, 0.7); backdrop-filter: blur(4px); }
         th { cursor: pointer; background: #f8fafc; color: #64748b; font-size: 11px; text-transform: uppercase; padding: 12px; border-bottom: 1px solid #e2e8f0; white-space: nowrap; }
+        td { padding: 12px; }
         .edit-row { background-color: #fffbeb !important; }
     </style>
 </head>
 <body class="p-4 md:p-8">
 
     <div class="max-w-7xl mx-auto">
-        <header class="mb-8 flex justify-between items-center">
+        <header class="mb-6 flex justify-between items-center">
             <div>
                 <h1 class="text-2xl font-bold navy-text">Flight Entry Management</h1>
                 <p class="text-xs text-slate-500 font-medium">South Sudan Civil Aviation Movement Tracking</p>
@@ -44,8 +45,26 @@
             </div>
         </header>
 
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
+            <div class="navy-bg p-5 rounded-xl border border-slate-200 shadow-sm flex flex-col items-center justify-center text-center text-white">
+                <i class="fa-solid fa-plane-up mb-2 text-xl opacity-80"></i>
+                <span class="text-[11px] font-bold text-slate-300 uppercase tracking-wider mb-1">Total A/C</span>
+                <span id="stat-total-new" class="text-3xl font-bold">142</span>
+            </div>
+            <div class="navy-bg p-5 rounded-xl border border-slate-200 shadow-sm flex flex-col items-center justify-center text-center text-white">
+                <i class="fa-solid fa-calendar-check mb-2 text-xl opacity-80"></i>
+                <span class="text-[11px] font-bold text-slate-300 uppercase tracking-wider mb-1">Current Month</span>
+                <span id="stat-curr-new" class="text-3xl font-bold">89</span>
+            </div>
+            <div class="navy-bg p-5 rounded-xl border border-slate-200 shadow-sm flex flex-col items-center justify-center text-center text-white">
+                <i class="fa-solid fa-clock-rotate-left mb-2 text-xl opacity-80"></i>
+                <span class="text-[11px] font-bold text-slate-300 uppercase tracking-wider mb-1">Last Month</span>
+                <span class="text-3xl font-bold">12</span>
+            </div>
+        </div>
+
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
-            <div class="lg:col-span-2">
+            <div class="lg:col-span-3">
                 <div class="bg-white rounded-xl border border-slate-200 p-6 shadow-sm">
                     <h2 class="font-bold text-slate-700 mb-6 flex items-center gap-2"><i class="fa-solid fa-pen-to-square navy-text"></i> New Flight Entry</h2>
                     
@@ -131,6 +150,16 @@
                             </div>
                         </div>
 
+                        <div class="form-group">
+                            <label class="block text-[11px] font-bold text-slate-400 mb-1 uppercase">Origin Type</label>
+                            <select id="originType" class="input-box">
+                                <option value="Domestic">Domestic</option>
+                                <option value="International (Landing)">International (Landing)</option>
+                                <option value="International (Takeoff)">International (Takeoff)</option>
+                                <option value="Overfly">Overfly</option>
+                            </select>
+                        </div>
+                        
                         <div class="dropdown-container">
                             <label class="block text-[11px] font-bold text-slate-400 mb-1 uppercase">Origin *</label>
                             <div class="input-box flex justify-between items-center cursor-pointer bg-white" onclick="toggleDropdown('depDropdown')">
@@ -167,16 +196,6 @@
                                 </div>
                                 <div class="p-2 border-t text-center"><button type="button" onclick="openPop('Destination Point')" class="text-[11px] font-bold navy-text">+ ADD NEW</button></div>
                             </div>
-                        </div>
-
-                        <div class="form-group">
-                            <label class="block text-[11px] font-bold text-slate-400 mb-1 uppercase">Origin Type</label>
-                            <select id="originType" class="input-box">
-                                <option value="Domestic">Domestic</option>
-                                <option value="International (Landing)">International (Landing)</option>
-                                <option value="International (Takeoff)">International (Takeoff)</option>
-                                <option value="Overfly">Overfly</option>
-                            </select>
                         </div>
 
                         <div class="dropdown-container">
@@ -227,24 +246,6 @@
                             </button>
                         </div>
                     </form>
-                </div>
-            </div>
-
-            <div class="space-y-6">
-                <div class="navy-bg text-white p-6 rounded-xl shadow-lg relative overflow-hidden">
-                    <h3 class="text-xs opacity-70 mb-6 font-bold uppercase tracking-widest">Registry Summary</h3>
-                    <div class="space-y-4 relative z-10">
-                        <div class="flex justify-between border-b border-white/10 pb-3"><span>Total A/C</span> <span id="stat-total" class="font-bold text-2xl">142</span></div>
-                        <div class="flex justify-between border-b border-white/10 pb-3"><span>Current Month</span> <span id="stat-curr" class="font-bold text-xl">89</span></div>
-                        <div class="flex justify-between"><span>Last Month</span> <span class="font-bold text-xl">12</span></div>
-                    </div>
-                    <i class="fa-solid fa-plane absolute -bottom-4 -right-4 text-white/5 text-8xl -rotate-12"></i>
-                </div>
-
-                <div class="bg-blue-50 border border-blue-100 p-6 rounded-xl">
-                    <h4 class="navy-text font-bold text-sm mb-2">Need Assistance?</h4>
-                    <p class="text-[11px] text-slate-600 leading-relaxed mb-4">Contact the Registry Division for missing codes.</p>
-                    <button class="w-full bg-white border border-slate-200 py-2 rounded-lg font-bold navy-text text-xs hover:bg-slate-50 transition">Contact Support</button>
                 </div>
             </div>
         </div>
@@ -413,8 +414,8 @@
         }
 
         function updateStats() {
-            document.getElementById('stat-total').innerText = stats.total;
-            document.getElementById('stat-curr').innerText = stats.curr;
+            document.getElementById('stat-total-new').innerText = stats.total;
+            document.getElementById('stat-curr-new').innerText = stats.curr;
         }
 
         function deleteRow(btn) { if(confirm("Delete?")) { btn.closest('tr').remove(); stats.total--; stats.curr--; updateStats(); } }
