@@ -48,8 +48,8 @@
         <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
             <div class="navy-bg p-5 rounded-xl border border-slate-200 shadow-sm flex flex-col items-center justify-center text-center text-white">
                 <i class="fa-solid fa-plane-up mb-2 text-xl opacity-80"></i>
-                <span class="text-[11px] font-bold text-slate-300 uppercase tracking-wider mb-1">Total A/C</span>
-                <span id="stat-total-new" class="text-3xl font-bold">142</span>
+                <span class="text-[11px] font-bold text-slate-300 uppercase tracking-wider mb-1">Today</span>
+                <span id="stat-total-new" class="text-3xl font-bold">0</span>
             </div>
             <div class="navy-bg p-5 rounded-xl border border-slate-200 shadow-sm flex flex-col items-center justify-center text-center text-white">
                 <i class="fa-solid fa-calendar-check mb-2 text-xl opacity-80"></i>
@@ -180,7 +180,7 @@
                         </div>
 
                         <div class="dropdown-container">
-                            <label class="block text-[11px] font-bold text-slate-400 mb-1 uppercase">Destination Point *</label>
+                            <label class="block text-[11px] font-bold text-slate-400 mb-1 uppercase">Destination *</label>
                             <div class="input-box flex justify-between items-center cursor-pointer bg-white" onclick="toggleDropdown('destDropdown')">
                                 <span id="display-dest" class="text-slate-400">Select Destination...</span>
                                 <i class="fa-solid fa-chevron-down text-[10px] text-slate-400"></i>
@@ -305,8 +305,14 @@
 
     <script>
         let currentTarget = "", editingRow = null;
-        let stats = { total: 142, curr: 89 };
+        let stats = { today: 0, curr: 89 };
         const selections = { reg: "", call: "", type: "", dep: "", dest: "", operator: "", firIn: "", firOut: "" };
+
+        // পেজ লোড হওয়ার সাথে সাথে আজকের তারিখ ইনপুট বক্সে সেট করে দেওয়া
+        window.onload = () => {
+            const today = new Date().toISOString().split('T')[0];
+            document.getElementById('flightDate').value = today;
+        };
 
         function toggleDropdown(id) {
             document.querySelectorAll('.custom-dropdown').forEach(d => { if(d.id !== id) d.style.display = 'none' });
@@ -370,13 +376,13 @@
             const tableBody = document.getElementById('tableBody');
             const sn = editingRow ? editingRow.cells[0].innerText : (tableBody.rows.length + 1).toString().padStart(3, '0');
             
-            const date = document.getElementById('flightDate').value;
+            const dateInput = document.getElementById('flightDate').value;
             const originType = document.getElementById('originType').value;
             const remarks = document.getElementById('remarks').value;
 
             const rowContent = `
                 <td>${sn}</td>
-                <td class="italic text-slate-500">${date}</td>
+                <td class="italic text-slate-500">${dateInput}</td>
                 <td>${selections.operator}</td>
                 <td class="font-bold text-blue-700">${selections.reg}</td>
                 <td>${selections.call}</td>
@@ -393,18 +399,43 @@
                 </td>
             `;
 
+            // আজকের তারিখ চেক করার নির্ভুল পদ্ধতি (Local Time)
+            const today = new Date();
+            const year = today.getFullYear();
+            const month = String(today.getMonth() + 1).padStart(2, '0');
+            const day = String(today.getDate()).padStart(2, '0');
+            const todayStr = `${year}-${month}-${day}`;
+
             if (editingRow) {
-                editingRow.innerHTML = rowContent; editingRow.classList.remove('edit-row'); editingRow = null;
+                const oldDate = editingRow.cells[1].innerText;
+                if (oldDate === todayStr && dateInput !== todayStr) stats.today--;
+                if (oldDate !== todayStr && dateInput === todayStr) stats.today++;
+
+                editingRow.innerHTML = rowContent; 
+                editingRow.classList.remove('edit-row'); 
+                editingRow = null;
                 document.getElementById('submitBtn').innerText = "Submit Entry";
             } else {
-                const tr = document.createElement('tr'); tr.className = "border-b hover:bg-slate-50"; tr.innerHTML = rowContent;
-                tableBody.prepend(tr); stats.total++; stats.curr++; updateStats();
+                const tr = document.createElement('tr'); 
+                tr.className = "border-b hover:bg-slate-50"; 
+                tr.innerHTML = rowContent;
+                tableBody.prepend(tr); 
+                
+                if(dateInput === todayStr) {
+                    stats.today++;
+                }
+                stats.curr++; 
             }
+            updateStats();
             resetForm();
         };
 
         function resetForm() {
             document.getElementById('flightForm').reset();
+            // তারিখ রিসেট হওয়ার পর আবার আজকের তারিখ সেট করে রাখা
+            const today = new Date().toISOString().split('T')[0];
+            document.getElementById('flightDate').value = today;
+
             ["reg", "call", "type", "dep", "dest", "operator", "firIn", "firOut"].forEach(k => {
                 selections[k] = ""; const d = document.getElementById(`display-${k}`);
                 if(d) {
@@ -414,11 +445,26 @@
         }
 
         function updateStats() {
-            document.getElementById('stat-total-new').innerText = stats.total;
+            document.getElementById('stat-total-new').innerText = stats.today;
             document.getElementById('stat-curr-new').innerText = stats.curr;
         }
 
-        function deleteRow(btn) { if(confirm("Delete?")) { btn.closest('tr').remove(); stats.total--; stats.curr--; updateStats(); } }
+        function deleteRow(btn) { 
+            if(confirm("Delete?")) { 
+                const row = btn.closest('tr');
+                const rowDate = row.cells[1].innerText;
+                
+                const today = new Date();
+                const todayStr = `${today.getFullYear()}-${String(today.getMonth()+1).padStart(2,'0')}-${String(today.getDate()).padStart(2,'0')}`;
+
+                if(rowDate === todayStr) {
+                    stats.today = Math.max(0, stats.today - 1);
+                }
+                row.remove(); 
+                stats.curr--; 
+                updateStats(); 
+            } 
+        }
 
         function editRow(btn) {
             editingRow = btn.closest('tr'); editingRow.classList.add('edit-row');
