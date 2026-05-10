@@ -47,19 +47,19 @@
 
         <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
             <div class="navy-bg p-5 rounded-xl border border-slate-200 shadow-sm flex flex-col items-center justify-center text-center text-white">
-                <i class="fa-solid fa-plane-up mb-2 text-xl opacity-80"></i>
+                <i class="fa-solid fa-calendar-day mb-2 text-xl opacity-80"></i>
                 <span class="text-[11px] font-bold text-slate-300 uppercase tracking-wider mb-1">Today</span>
                 <span id="stat-total-new" class="text-3xl font-bold">0</span>
             </div>
             <div class="navy-bg p-5 rounded-xl border border-slate-200 shadow-sm flex flex-col items-center justify-center text-center text-white">
                 <i class="fa-solid fa-calendar-check mb-2 text-xl opacity-80"></i>
                 <span class="text-[11px] font-bold text-slate-300 uppercase tracking-wider mb-1">Current Month</span>
-                <span id="stat-curr-new" class="text-3xl font-bold">89</span>
+                <span id="stat-curr-new" class="text-3xl font-bold">0</span>
             </div>
             <div class="navy-bg p-5 rounded-xl border border-slate-200 shadow-sm flex flex-col items-center justify-center text-center text-white">
                 <i class="fa-solid fa-clock-rotate-left mb-2 text-xl opacity-80"></i>
                 <span class="text-[11px] font-bold text-slate-300 uppercase tracking-wider mb-1">Last Month</span>
-                <span class="text-3xl font-bold">12</span>
+                <span class="text-3xl font-bold">0</span>
             </div>
         </div>
 
@@ -292,9 +292,8 @@
                 <button onclick="closePop()" class="text-slate-400 text-2xl">&times;</button>
             </div>
             <div class="p-6">
-                <label class="block text-[10px] font-bold text-slate-400 mb-2 uppercase">Identification Value</label>
+                <label class="block text-[10px] font-bold text-slate-400 mb-2 uppercase">Value</label>
                 <input type="text" id="modalInput" placeholder="Enter value..." class="input-box uppercase font-bold text-blue-600 mb-2">
-                
                 <div class="flex gap-3 mt-8">
                     <button onclick="closePop()" class="flex-1 py-3 text-slate-400 font-bold hover:bg-slate-50 rounded-lg">Cancel</button>
                     <button onclick="saveFromModal()" class="flex-1 py-3 bg-blue-600 text-white font-bold rounded-lg">Add Record</button>
@@ -305,19 +304,21 @@
 
     <script>
         let currentTarget = "", editingRow = null;
-        let stats = { today: 0, curr: 89 };
+        let stats = { today: 0, curr: 0 };
         const selections = { reg: "", call: "", type: "", dep: "", dest: "", operator: "", firIn: "", firOut: "" };
 
-        // পেজ লোড হওয়ার সাথে সাথে আজকের তারিখ ইনপুট বক্সে সেট করে দেওয়া
+        // Page Init
         window.onload = () => {
-            const today = new Date().toISOString().split('T')[0];
-            document.getElementById('flightDate').value = today;
+            const now = new Date();
+            const localDate = now.getFullYear() + '-' + String(now.getMonth() + 1).padStart(2, '0') + '-' + String(now.getDate()).padStart(2, '0');
+            document.getElementById('flightDate').value = localDate;
+            updateStats();
         };
 
         function toggleDropdown(id) {
             document.querySelectorAll('.custom-dropdown').forEach(d => { if(d.id !== id) d.style.display = 'none' });
             const el = document.getElementById(id);
-            el.style.display = el.style.display === 'block' ? 'none' : 'block';
+            el.style.display = (el.style.display === 'block') ? 'none' : 'block';
         }
 
         function filterList(input, listId) {
@@ -349,18 +350,11 @@
         function saveFromModal() {
             const val = document.getElementById('modalInput').value.trim().toUpperCase();
             if (!val) return alert("Value cannot be empty!");
-            
             const map = { 
-                "Registration": "reg", 
-                "Callsign": "call", 
-                "Aircraft Type": "type", 
-                "Departure Point": "dep", 
-                "Destination Point": "dest",
-                "Operator": "operator",
-                "FIR In": "firIn",
-                "FIR Out": "firOut"
+                "Registration": "reg", "Callsign": "call", "Aircraft Type": "type", 
+                "Departure Point": "dep", "Destination Point": "dest",
+                "Operator": "operator", "FIR In": "firIn", "FIR Out": "firOut"
             };
-            
             const key = map[currentTarget];
             const div = document.createElement('div');
             div.className = "dropdown-item"; div.innerText = val;
@@ -369,18 +363,22 @@
             selectItem(key, val); closePop();
         }
 
+        // --- SUBMIT LOGIC ---
         document.getElementById('flightForm').onsubmit = (e) => {
             e.preventDefault();
             if (!selections.reg || !selections.call || !selections.type || !selections.dep || !selections.dest || !selections.operator) return alert("Fill mandatory fields!");
 
             const tableBody = document.getElementById('tableBody');
             const sn = editingRow ? editingRow.cells[0].innerText : (tableBody.rows.length + 1).toString().padStart(3, '0');
-            
             const dateInput = document.getElementById('flightDate').value;
             const originType = document.getElementById('originType').value;
             const remarks = document.getElementById('remarks').value;
 
-            const rowContent = `
+            // Get Today's Date String for comparison
+            const now = new Date();
+            const todayStr = now.getFullYear() + '-' + String(now.getMonth() + 1).padStart(2, '0') + '-' + String(now.getDate()).padStart(2, '0');
+
+            const rowHTML = `
                 <td>${sn}</td>
                 <td class="italic text-slate-500">${dateInput}</td>
                 <td>${selections.operator}</td>
@@ -390,8 +388,8 @@
                 <td>${selections.dep}</td>
                 <td>${selections.dest}</td>
                 <td>${originType}</td>
-                <td>${selections.firIn}</td>
-                <td>${selections.firOut}</td>
+                <td>${selections.firIn || '-'}</td>
+                <td>${selections.firOut || '-'}</td>
                 <td class="text-xs text-slate-400 truncate max-w-[150px]">${remarks}</td>
                 <td class="flex gap-3 text-slate-300 py-4">
                     <i class="fa-solid fa-pen-to-square hover:text-blue-600 cursor-pointer" onclick="editRow(this)"></i>
@@ -399,48 +397,41 @@
                 </td>
             `;
 
-            // আজকের তারিখ চেক করার নির্ভুল পদ্ধতি (Local Time)
-            const today = new Date();
-            const year = today.getFullYear();
-            const month = String(today.getMonth() + 1).padStart(2, '0');
-            const day = String(today.getDate()).padStart(2, '0');
-            const todayStr = `${year}-${month}-${day}`;
-
             if (editingRow) {
+                // Update Logic
                 const oldDate = editingRow.cells[1].innerText;
                 if (oldDate === todayStr && dateInput !== todayStr) stats.today--;
                 if (oldDate !== todayStr && dateInput === todayStr) stats.today++;
-
-                editingRow.innerHTML = rowContent; 
-                editingRow.classList.remove('edit-row'); 
+                
+                editingRow.innerHTML = rowHTML;
+                editingRow.classList.remove('edit-row');
                 editingRow = null;
                 document.getElementById('submitBtn').innerText = "Submit Entry";
             } else {
-                const tr = document.createElement('tr'); 
-                tr.className = "border-b hover:bg-slate-50"; 
-                tr.innerHTML = rowContent;
-                tableBody.prepend(tr); 
+                // New Entry Logic
+                const tr = document.createElement('tr');
+                tr.className = "border-b hover:bg-slate-50";
+                tr.innerHTML = rowHTML;
+                tableBody.prepend(tr);
                 
-                if(dateInput === todayStr) {
-                    stats.today++;
-                }
-                stats.curr++; 
+                if (dateInput === todayStr) stats.today++;
+                stats.curr++;
             }
+            
             updateStats();
             resetForm();
         };
 
         function resetForm() {
             document.getElementById('flightForm').reset();
-            // তারিখ রিসেট হওয়ার পর আবার আজকের তারিখ সেট করে রাখা
-            const today = new Date().toISOString().split('T')[0];
-            document.getElementById('flightDate').value = today;
+            const now = new Date();
+            const localDate = now.getFullYear() + '-' + String(now.getMonth() + 1).padStart(2, '0') + '-' + String(now.getDate()).padStart(2, '0');
+            document.getElementById('flightDate').value = localDate;
 
             ["reg", "call", "type", "dep", "dest", "operator", "firIn", "firOut"].forEach(k => {
-                selections[k] = ""; const d = document.getElementById(`display-${k}`);
-                if(d) {
-                    d.innerText = `Select ${k.toUpperCase()}...`; d.className = "text-slate-400";
-                }
+                selections[k] = ""; 
+                const d = document.getElementById(`display-${k}`);
+                if(d) { d.innerText = `Select ${k.toUpperCase()}...`; d.className = "text-slate-400"; }
             });
         }
 
@@ -450,24 +441,22 @@
         }
 
         function deleteRow(btn) { 
-            if(confirm("Delete?")) { 
+            if(confirm("Are you sure?")) { 
                 const row = btn.closest('tr');
                 const rowDate = row.cells[1].innerText;
-                
-                const today = new Date();
-                const todayStr = `${today.getFullYear()}-${String(today.getMonth()+1).padStart(2,'0')}-${String(today.getDate()).padStart(2,'0')}`;
+                const now = new Date();
+                const todayStr = now.getFullYear() + '-' + String(now.getMonth() + 1).padStart(2, '0') + '-' + String(now.getDate()).padStart(2, '0');
 
-                if(rowDate === todayStr) {
-                    stats.today = Math.max(0, stats.today - 1);
-                }
+                if(rowDate === todayStr) stats.today = Math.max(0, stats.today - 1);
+                stats.curr = Math.max(0, stats.curr - 1);
                 row.remove(); 
-                stats.curr--; 
                 updateStats(); 
             } 
         }
 
         function editRow(btn) {
-            editingRow = btn.closest('tr'); editingRow.classList.add('edit-row');
+            editingRow = btn.closest('tr');
+            editingRow.classList.add('edit-row');
             document.getElementById('submitBtn').innerText = "Update Record";
             
             document.getElementById('flightDate').value = editingRow.cells[1].innerText;
@@ -486,10 +475,12 @@
 
         function filterTable() {
             const term = document.getElementById('tableFilter').value.toLowerCase();
-            document.querySelectorAll('#tableBody tr').forEach(row => { row.style.display = row.innerText.toLowerCase().includes(term) ? '' : 'none'; });
+            document.querySelectorAll('#tableBody tr').forEach(row => { 
+                row.style.display = row.innerText.toLowerCase().includes(term) ? '' : 'none'; 
+            });
         }
 
-        function exportToExcel() { XLSX.writeFile(XLSX.utils.table_to_book(document.getElementById("flightTable")), "Flights.xlsx"); }
+        function exportToExcel() { XLSX.writeFile(XLSX.utils.table_to_book(document.getElementById("flightTable")), "FlightRecords.xlsx"); }
         
         function sortTable(n) {
             const table = document.getElementById("flightTable");
@@ -498,12 +489,21 @@
             while (switching) {
                 switching = false; rows = table.rows;
                 for (i = 1; i < (rows.length - 1); i++) {
-                    shouldSwitch = false; x = rows[i].getElementsByTagName("TD")[n]; y = rows[i + 1].getElementsByTagName("TD")[n];
-                    if (dir == "asc" && x.innerHTML.toLowerCase() > y.innerHTML.toLowerCase()) { shouldSwitch = true; break; }
-                    else if (dir == "desc" && x.innerHTML.toLowerCase() < y.innerHTML.toLowerCase()) { shouldSwitch = true; break; }
+                    shouldSwitch = false;
+                    x = rows[i].getElementsByTagName("TD")[n];
+                    y = rows[i + 1].getElementsByTagName("TD")[n];
+                    if (dir == "asc") {
+                        if (x.innerHTML.toLowerCase() > y.innerHTML.toLowerCase()) { shouldSwitch = true; break; }
+                    } else if (dir == "desc") {
+                        if (x.innerHTML.toLowerCase() < y.innerHTML.toLowerCase()) { shouldSwitch = true; break; }
+                    }
                 }
-                if (shouldSwitch) { rows[i].parentNode.insertBefore(rows[i + 1], rows[i]); switching = true; switchcount ++; }
-                else if (switchcount == 0 && dir == "asc") { dir = "desc"; switching = true; }
+                if (shouldSwitch) {
+                    rows[i].parentNode.insertBefore(rows[i + 1], rows[i]);
+                    switching = true; switchcount ++;
+                } else {
+                    if (switchcount == 0 && dir == "asc") { dir = "desc"; switching = true; }
+                }
             }
         }
     </script>
